@@ -7,21 +7,25 @@ d3.json(url).then(createMarkers);
 function createMarkers(response) {
     //pull earthquake information
     var data = response.features
-    var coordinates = response.features.properties.mag;
+    // var coordinates = response.features.properties.mag;
 
     console.log(`createMarkers - data - ${data}`)
-    console.log(`createMarkers - coordinates - ${coordinates}`)
+    // console.log(`createMarkers - coordinates - ${coordinates}`)
 
     // Initialize an array to hold the earthquake markers
     var earthquakeMarkers = [];
 
     // Loop through the earthquakes array
-    for (var index = 0; index < coordinates.length; index++) {
-        var station = coordinates[index];
-    
+    for (var index = 0; index < data.length; index++) {
+        var coordinates = data[index].geometry.coordinates;
+        var magnitude = data[index].properties.mag;
+        var place = data[index].properties.place;
+        var time = data[index].properties.time;
+
+        console.log(coordinates[0],coordinates[1])
         // For each station, create a marker, and bind a popup with the station's name.
-        var earthquakeMarker = L.marker([station.lat, station.lon])
-          .bindPopup("<h3>" + station.name + "<h3><h3>Capacity: " + station.capacity + "</h3>");
+        var earthquakeMarker = L.marker([coordinates[1], coordinates[0]])
+          .bindPopup("<h3>Coordinates [" + coordinates[1]+","+coordinates[0]+ "]<h3><h3>Magnitude: " + magnitude + "</h3>");
     
         // Add the marker to the bikeMarkers array.
         earthquakeMarkers.push(earthquakeMarker);
@@ -43,23 +47,40 @@ function createMap(earthquakeLocations) {
 
     // Create a baseMaps object to hold the streetmap layer.
     var baseMaps = {
-    "Street Map": streetmap
+        "Street Map": streetmap
     };
 
     // Create an overlayMaps object to hold the earthquakeLocations layer.
     var overlayMaps = {
-    "Earthquakes": earthquakeLocations
+        "Earthquakes": earthquakeLocations
     };
 
     // Create the map object with options.
-    var map = L.map("map-id", {
-    center: [40.73, -74.0059],
-    zoom: 12,
-    layers: [streetmap, earthquakeLocations]
+    var map = L.map("map", {
+        center: [40.73, -100.0059],
+        zoom: 4,
+        layers: [streetmap, earthquakeLocations]
     });
 
     // Create a layer control, and pass it baseMaps and overlayMaps. Add the layer control to the map.
     L.control.layers(baseMaps, overlayMaps, {
-    collapsed: false
+        collapsed: false
     }).addTo(map);
+
+    // Create a legend to display information about our map.
+    var info = L.control({
+        position: "bottomright"
+     });
+    
+    document.querySelector(".legend").innerHTML = [
+        "<p class='out-of-order'>Out of Order Stations: " + "XX" + "</p>",
+        "<p class='coming-soon'>Stations Coming Soon: " + "XX" + "</p>",
+        "<p class='empty'>Empty Stations: " + "XX" + "</p>",
+        "<p class='low'>Low Stations: " + "XX" + "</p>",
+        "<p class='healthy'>Healthy Stations: " + "XX" + "</p>"
+      ].join(""); 
+    // Add the info legend to the map.
+    info.addTo(map);
+
+    
 }
